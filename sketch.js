@@ -5,17 +5,20 @@ let time_table_event = null
 
 class Slider {
     constructor(position) {
-    this.pos    = position; // middle of the slider
-    this.Width  = 200; // Width of the slider
+    this.textOffset= 10;
+    this.knobSize = 40;
     this.height = 20; // height of the slider
+    this.pos    = position; // middle of the slider
+    this.pos.y  = height-this.height-(this.textOffset*2);
+    this.Width  = width/2; // Width of the slider
     this.Value  = 4; // Initial value of the slider
     this.Max    = 6;
     this.Min    = 2;
-    this.PX     = 50; // Count of px from the left to the value 
+    //this.PX     = 50; // Count of px from the left to the value 
+    this.PX = map(this.Value, this.Min, this.Max, 0, this.Width);
     this.dragging= false;
     this.rpos   = createVector(this.pos.x - (this.Width/2), this.pos.y - (this.height/2)); //top left of rect
     this.knob   = createVector(this.rpos.x + this.PX, this.pos.y);
-    this.knobSize = 40;
     this.text   = () => "Value: " + this.Value.toFixed(2);
     }
 
@@ -45,7 +48,7 @@ class Slider {
         //text("Value: " + roundedValue, 10, height - 10);
         textAlign(CENTER);
         fill(255);
-        text(this.text(), this.pos.x, this.pos.y + this.height + 10);
+        text(this.text(), this.pos.x, this.pos.y + this.height + this.textOffset);
     }
 
     
@@ -65,24 +68,40 @@ class Slider {
             this.knob.x = this.rpos.x + this.PX;
         }
     }
+
+    resize(newWidth, newHeight) {
+        this.pos.x = newWidth/2;
+        this.pos.y = newHeight-this.height-(this.textOffset*2);
+        this.Width  = newWidth/2;
+        this.rpos   = createVector(this.pos.x - (this.Width/2), this.pos.y - (this.height/2)); //top left of rect
+        this.PX = map(this.Value, this.Min, this.Max, 0, this.Width);
+        this.knob   = createVector(this.rpos.x + this.PX, this.pos.y);
+    }
 }
 
 
 class parkingLot {
     constructor (Position, Park_finding_time, distance, name) {
+        this.size = createVector(200,100);
         this.pos = Position;
         this.ttp = Park_finding_time;  // time to (find a) park
         this.distance = distance;
         this.name = name;
         this.color = color(200,50,20);
-        this.vec_to_event = p5.Vector.sub(time_table_event.pos,this.pos);
-        this.vec_to_event.mult(0.6);
+        this.calculate_event_vec();
+        //this.vec_to_event = p5.Vector.sub(time_table_event.pos,this.pos);
+        //this.vec_to_event.mult(0.6);
     }
 
+    calculate_event_vec() {
+        this.vec_to_event = p5.Vector.sub(time_table_event.pos,this.pos);
+        this.vec_to_event.mult(0.6);
+
+    }
     draw() {
         rectMode(CENTER);
         fill(200);
-        rect(this.pos.x,this.pos.y, 150,100);
+        rect(this.pos.x,this.pos.y, this.size.x,this.size.y);
         //textAlign(LEFT);
         fill(0);
         text("Parking Lot " + this.name + "\n" +
@@ -105,17 +124,22 @@ class parkingLot {
 
 class cal_event {
     constructor () {
-        this.pos = createVector(600,100);
+        this.size = createVector(150,100);
+        this.pos = createVector(width-(this.size.x/2)-10,60);
         this.name = "Event";
     }
 
     draw() {
         rectMode(CENTER);
         fill(200);
-        rect(this.pos.x,this.pos.y, 150,150);
+        rect(this.pos.x,this.pos.y, this.size.x, this.size.y);
         //textAlign(LEFT);
         fill(0);
         text(this.name, this.pos.x, this.pos.y);
+    }
+
+    resize() {
+        this.pos.x = windowWidth-(this.size.x/2)-10;
     }
 }
 
@@ -194,13 +218,13 @@ function setup() {
     time_table_event = new cal_event();
 
     lot1 = new parkingLot(
-        createVector(100,100),  // position to display on screen
+        createVector(110,300),  // position to display on screen
         1/60,                   // 1 min to find park
-        1/3,                    // 0.33km takes 5min to walk at 4km/h
+        1/3 + 0.001,            // 0.33km takes 5min to walk at 4km/h, offset to avoid seconds for default value
         "7"
     );
     lot2 = new parkingLot(
-        createVector(100,300),  // position to display on screen
+        createVector(110,60),  // position to display on screen
         5/60,                   // 5 min to find park
         8/60,                   // 0.13km takes 2min to walk at 4km/h
         "10"
@@ -230,3 +254,12 @@ function mouseReleased() {
 function mouseDragged() {
     walking_speed.drag(mouseX);
 }
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    time_table_event.resize();
+    //time_table_event.pos.x = windowWidth*0.8;
+    walking_speed.resize(windowWidth, windowHeight);
+    lot1.calculate_event_vec();
+    lot2.calculate_event_vec();
+  }
