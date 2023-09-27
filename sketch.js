@@ -1,4 +1,7 @@
 let walking_speed = null;
+let lot1 = null;
+let lot2 = null;
+let time_table_event = null
 
 class Slider {
     constructor(position) {
@@ -17,6 +20,7 @@ class Slider {
 
 
     draw() {  // Display the slider and it's value
+        rectMode(CORNER);
         this.drawSlider();
         this.drawText();
     }
@@ -62,6 +66,43 @@ class Slider {
 }
 
 
+class parkingLot {
+    constructor (Position, Park_finding_time, distance, name) {
+        this.pos = Position;
+        this.ttp = Park_finding_time;  // time to (find a) park
+        this.distance = distance;
+        this.name = name;
+    }
+
+    draw() {
+        rectMode(CENTER);
+        fill(200);
+        rect(this.pos.x,this.pos.y, 150,100);
+        //textAlign(LEFT);
+        fill(0);
+        text("Parking Lot " + this.name + "\n" +
+            "Time to park: " + this.ttp.toString() + "min",
+             this.pos.x, this.pos.y);
+    }
+}
+
+class cal_event {
+    constructor () {
+        this.pos = createVector(600,100);
+        this.name = "Event";
+    }
+
+    draw() {
+        rectMode(CENTER);
+        fill(200);
+        rect(this.pos.x,this.pos.y, 150,150);
+        //textAlign(LEFT);
+        fill(0);
+        text(this.name, this.pos.x, this.pos.y);
+    }
+}
+
+
 function setup() {
     //createCanvas(400, 200);
     createCanvas(windowWidth, windowHeight);
@@ -74,13 +115,30 @@ function setup() {
     walking_speed = new Slider(createVector(width/2, height-200));
     walking_speed.text = () => "Walking Speed (KM/H): " + walking_speed.Value.toFixed(2);
     //drawSlider(sliderX, sliderValue);
+
+    time_table_event = new cal_event();
+
+    lot1 = new parkingLot(
+        createVector(100,100),  // position to display on screen
+        1,                      // min to find park
+        1/3,                    // 0.33km takes 5min to walk at 4km/h
+        "7"
+    );
+    lot2 = new parkingLot(
+        createVector(100,300),  // position to display on screen
+        5,                      // min to find park
+        8/60,                   // 0.13km takes 2min to walk at 4km/h
+        "10"
+    );
 }
 
 
 function draw() {
     background(0);
     walking_speed.draw();
-    
+    time_table_event.draw();
+    lot1.draw();  
+    lot2.draw();  
 }
 
 
