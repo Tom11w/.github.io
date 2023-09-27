@@ -2,12 +2,13 @@ let walking_speed = null;
 let lot1 = null;
 let lot2 = null;
 let time_table_event = null
+let showSeconds = true;
 
 class Slider {
     constructor(position) {
-    this.textOffset= 10;
-    this.knobSize = 40;
-    this.height = 20; // height of the slider
+    this.textOffset= 20;
+    this.knobSize = 80;
+    this.height = 40; // height of the slider
     this.pos    = position; // middle of the slider
     this.pos.y  = height-this.height-(this.textOffset*2);
     this.Width  = width/2; // Width of the slider
@@ -53,7 +54,7 @@ class Slider {
 
     
     press(mousePos) { // Check if the mouse is over the slider knob when pressed
-        if (this.knob.dist(mousePos) < 10) {
+        if (this.knob.dist(mousePos) < this.knobSize/2) {
             this.dragging = true;
             //this.offsetX = this.knob.x - mousePos.x;
         }
@@ -82,9 +83,10 @@ class Slider {
 
 class parkingLot {
     constructor (Position, Park_finding_time, distance, name) {
-        this.size = createVector(200,100);
+        this.size = createVector(250,200);
         this.pos = Position;
         this.ttp = Park_finding_time;  // time to (find a) park
+        this.totalTime = 0;
         this.distance = distance;
         this.name = name;
         this.color = color(200,50,20);
@@ -99,15 +101,19 @@ class parkingLot {
 
     }
     draw() {
+        this.totalTime = this.ttp + this.time_to_walk()
+        push();
         rectMode(CENTER);
         fill(200);
         rect(this.pos.x,this.pos.y, this.size.x,this.size.y);
         //textAlign(LEFT);
         fill(0);
+        textAlign(LEFT,TOP);
         text("Parking Lot " + this.name + "\n" +
             "Time to park: " + timeConvert(this.ttp) + "\n" +
-            "Total time: " + timeConvert(this.ttp + this.time_to_walk()),
-             this.pos.x, this.pos.y);
+            "Total time: " + timeConvert(this.totalTime),
+             this.pos.x - this.size.x/2 + 10, this.pos.y- this.size.y/2 + 10);
+        pop();
         drawArrow(
             p5.Vector.lerp(this.pos,time_table_event.pos,0.20),
             this.vec_to_event,
@@ -158,7 +164,7 @@ function drawArrow(base, vec, myColor, label) {
     fill(255);
     textSize(15);
     stroke(color(0,0,0,0));
-    text(label, -vec.mag()/2, -10);
+    text(label, -vec.mag()/2, -30);
     pop();
   } // from example https://p5js.org/reference/#/p5.Vector/dist
 
@@ -173,6 +179,9 @@ function timeConvert(n) {
     var seconds = (minutes - rminutes) * 60;
     var rseconds = Math.floor(seconds);
     var text = "";
+    if (showSeconds) {
+        text += "\n";
+    }
     if (rhours!=0) {
         text += rhours.toString() + "hour"; 
         if (rhours > 1){
@@ -188,13 +197,15 @@ function timeConvert(n) {
             text += "s";
         }
     }
-    if ((rhours!=0 || rminutes != 0) && rseconds != 0) {
-        text += " and ";
-    }
-    if (rseconds != 0) {
-        text += rseconds .toString() + " second";
-        if (rseconds != 1) {
-            text += "s";
+    if (showSeconds) {
+        if ((rhours!=0 || rminutes != 0) && rseconds != 0) {
+            text += " and ";
+        }
+        if (rseconds != 0) {
+            text += rseconds .toString() + " second";
+            if (rseconds != 1) {
+                text += "s";
+            }
         }
     }
     return text;
@@ -205,7 +216,7 @@ function timeConvert(n) {
 function setup() {
     //createCanvas(400, 200);
     createCanvas(windowWidth, windowHeight);
-  
+    textSize(20);
     // Calculate the initial X-coordinate of the slider
     //sliderX = (width - sliderWidth) / 2;
     //sliderPX = map(sliderValue, sliderMin, sliderMax, 0, sliderWidth)
@@ -218,13 +229,13 @@ function setup() {
     time_table_event = new cal_event();
 
     lot1 = new parkingLot(
-        createVector(110,300),  // position to display on screen
+        createVector(160,350),  // position to display on screen
         1/60,                   // 1 min to find park
-        1/3 + 0.001,            // 0.33km takes 5min to walk at 4km/h, offset to avoid seconds for default value
+        20001/60000,            // 0.33km takes 5min to walk at 4km/h, offset fudge factor to avoid seconds for default value
         "7"
     );
     lot2 = new parkingLot(
-        createVector(110,60),  // position to display on screen
+        createVector(160,125),  // position to display on screen
         5/60,                   // 5 min to find park
         8/60,                   // 0.13km takes 2min to walk at 4km/h
         "10"
