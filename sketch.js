@@ -72,6 +72,9 @@ class parkingLot {
         this.ttp = Park_finding_time;  // time to (find a) park
         this.distance = distance;
         this.name = name;
+        this.color = color(200,50,20);
+        this.vec_to_event = p5.Vector.sub(time_table_event.pos,this.pos);
+        this.vec_to_event.mult(0.7);
     }
 
     draw() {
@@ -83,6 +86,15 @@ class parkingLot {
         text("Parking Lot " + this.name + "\n" +
             "Time to park: " + this.ttp.toString() + "min",
              this.pos.x, this.pos.y);
+        drawArrow(
+            p5.Vector.add(this.pos,createVector(75,0)),
+            this.vec_to_event,
+            this.color,
+            (this.ttw_text()).toFixed(1) + "Min"
+            );
+    }
+    ttw_text() { //time to walk to event
+        return (this.distance/walking_speed.Value)*60 // (distance (km) / speed (km/h)) * 60 = walking time in minutes
     }
 }
 
@@ -101,6 +113,26 @@ class cal_event {
         text(this.name, this.pos.x, this.pos.y);
     }
 }
+
+// draw an arrow for a vector at a given base position
+function drawArrow(base, vec, myColor, label) {
+    push();
+    stroke(myColor);
+    strokeWeight(10);
+    fill(myColor);
+    translate(base.x, base.y);
+    line(0, 0, vec.x, vec.y);
+    rotate(vec.heading());
+    let arrowSize = 30;
+    translate(vec.mag() - arrowSize, 0);
+    triangle(0, arrowSize / 2, 0, -arrowSize / 2, arrowSize, 0);
+    fill(255);
+    textSize(20);
+    stroke(color(0,0,0,0));
+    text(label, -vec.mag()/2, -10);
+    pop();
+  } // from example https://p5js.org/reference/#/p5.Vector/dist
+
 
 
 function setup() {
