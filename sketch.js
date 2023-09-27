@@ -243,6 +243,7 @@ function draw() {
 
 function mousePressed() {
   walking_speed.press(createVector(mouseX,mouseY));
+  console.log("Mouse");
 }
 
 
@@ -253,6 +254,11 @@ function mouseReleased() {
 
 function mouseDragged() {
     walking_speed.drag(mouseX);
+}
+
+function touchStarted() {
+  walking_speed.press(createVector(mouseX,mouseY));
+  console.log("touch");
 }
 
 function windowResized() {
